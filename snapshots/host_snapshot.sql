@@ -11,7 +11,7 @@
   SELECT
     host_id,
     host_name,
-    host_since,
+    CAST(host_since AS TIMESTAMP) AS host_since, 
     host_is_superhost,
     host_neighbourhood
   FROM {{ source('bronze', 'airbnb_raw') }}
