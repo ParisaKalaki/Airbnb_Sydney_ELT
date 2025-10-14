@@ -1,4 +1,4 @@
-{{ config(schema='gold', materialized='view') }}
+{{ config(schema='silver', materialized='view') }}
 
 SELECT
     md5(lower(trim(suburb_name))) AS suburb_key,
