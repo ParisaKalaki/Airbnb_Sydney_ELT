@@ -1,0 +1,102 @@
+version: 2
+
+models:
+  - name: dm_host
+    description: "Dimension table for Airbnb hosts containing current host attributes."
+    columns:
+      - name: host_key
+        description: "Surrogate key for the host dimension."
+        tests:
+          - unique
+          - not_null
+      - name: host_id
+        description: "Original host identifier."
+      - name: host_name
+        description: "Host's display name."
+      - name: host_is_superhost
+        description: "Indicates if the host is a Superhost."
+
+  - name: dm_suburb
+    description: "Dimension table for suburbs, linked to LGAs."
+    columns:
+      - name: suburb_key
+        description: "Surrogate key for the suburb dimension."
+        tests:
+          - unique
+          - not_null
+      - name: suburb_name
+        description: "Name of the suburb."
+      - name: lga_code
+        description: "Foreign key linking to the LGA dimension."
+
+  - name: dm_lga
+    description: "Dimension table for LGAs (Local Government Areas)."
+    columns:
+      - name: lga_key
+        description: "Surrogate key for the LGA dimension."
+        tests:
+          - unique
+          - not_null
+      - name: lga_code
+        description: "LGA code used for joining with census data."
+      - name: lga_name
+        description: "LGA name."
+
+  - name: dm_census
+    description: "Dimension table derived from Census G01 and G02, providing demographic and income data per LGA."
+    columns:
+      - name: lga_code
+        description: "Foreign key referencing the LGA dimension."
+        tests:
+          - relationships:
+              to: ref('dm_lga')
+              field: lga_code
+      - name: total_population
+        description: "Total population of the LGA."
+      - name: median_age_persons
+        description: "Median age of persons in the LGA."
+      - name: median_rent_weekly
+        description: "Median weekly rent in the LGA."
+
+  - name: dm_lga_enriched
+    description: "Combined dimension joining LGA administrative info with Census data for richer analysis."
+    columns:
+      - name: lga_key
+        description: "Surrogate key for the LGA."
+        tests:
+          - unique
+          - not_null
+      - name: total_population
+        description: "Total population from the Census."
+      - name: median_tot_prsnl_inc_weekly
+        description: "Median weekly personal income in the LGA."
+
+  - name: fact_listings
+    description: "Fact table combining listings, hosts, suburbs, and LGAs for analytical reporting."
+    columns:
+      - name: listing_id
+        description: "Unique listing identifier."
+        tests:
+          - not_null
+      - name: scraped_date
+        description: "Date when the listing data was scraped."
+      - name: price
+        description: "Listing price at the scraped date."
+      - name: host_key
+        description: "Foreign key referencing dm_host."
+        tests:
+          - relationships:
+              to: ref('dm_host')
+              field: host_key
+      - name: suburb_key
+        description: "Foreign key referencing dm_suburb."
+        tests:
+          - relationships:
+              to: ref('dm_suburb')
+              field: suburb_key
+      - name: lga_key
+        description: "Foreign key referencing dm_lga_enriched."
+        tests:
+          - relationships:
+              to: ref('dm_lga_enriched')
+              field: lga_key

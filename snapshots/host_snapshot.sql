@@ -4,7 +4,7 @@
       target_schema='silver',
       unique_key='host_id',
       strategy='timestamp',
-      updated_at='host_since'
+      updated_at='scraped_date'  -- use the scraped date from listings_clean
     )
   }}
 
@@ -13,6 +13,7 @@
     host_name,
     host_since,
     host_is_superhost,
-    host_neighbourhood
-  FROM {{ source('bronze', 'airbnb_raw') }}
+    host_neighbourhood,
+    scraped_date
+  FROM {{ ref('listings_clean') }}
 {% endsnapshot %}

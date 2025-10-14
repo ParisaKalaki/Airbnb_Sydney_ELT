@@ -1,0 +1,115 @@
+version: 2
+
+models:
+  - name: listings_clean
+    description: "Cleaned Airbnb listings with proper data types and cleaned boolean fields."
+    columns:
+      - name: listing_id
+        description: "Unique identifier for the listing."
+        tests:
+          - not_null
+          - unique
+      - name: scraped_date
+        description: "Date the listing was scraped."
+        tests:
+          - not_null
+      - name: host_id
+        description: "Host identifier associated with the listing."
+      - name: property_type
+        description: "Type of the property (e.g., apartment, house)."
+      - name: room_type
+        description: "Type of room (e.g., entire home, private room)."
+
+  - name: host_clean
+    description: "Cleaned dimension of Airbnb hosts."
+    columns:
+      - name: host_id
+        description: "Unique host identifier."
+        tests:
+          - not_null
+          - unique
+      - name: host_name
+        description: "Host's display name."
+      - name: host_since
+        description: "Date the host joined Airbnb."
+      - name: host_is_superhost
+        description: "Boolean flag indicating if the host is a Superhost."
+
+  - name: property_clean
+    description: "Cleaned property attributes extracted from listings."
+    columns:
+      - name: listing_id
+        description: "Unique identifier for the listing."
+        tests:
+          - not_null
+          - unique
+      - name: property_type
+        description: "Type of property (e.g., apartment, house)."
+      - name: room_type
+        description: "Type of room (e.g., entire home, private room)."
+      - name: accommodates
+        description: "Number of guests the property can accommodate."
+
+  - name: lga_code_clean
+    description: "Cleaned LGA codes and names."
+    columns:
+      - name: lga_code
+        description: "Local Government Area code."
+        tests:
+          - not_null
+          - unique
+      - name: lga_name
+        description: "LGA name."
+
+  - name: lga_suburb_clean
+    description: "Cleaned mapping between suburbs and LGAs."
+    columns:
+      - name: suburb_name
+        description: "Name of the suburb."
+        tests:
+          - not_null
+      - name: lga_code
+        description: "Foreign key to LGA dimension."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('lga_code_clean')
+              field: lga_code
+      - name: lga_name
+        description: "LGA name, duplicated for convenience."
+
+  - name: census_g01_clean
+    description: "Cleaned Census G01 data with population and demographic info per LGA."
+    columns:
+      - name: lga_code
+        description: "Foreign key to LGA."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('lga_code_clean')
+              field: lga_code
+      - name: total_population
+        description: "Total population of the LGA."
+      - name: indigenous_population
+        description: "Population identifying as Indigenous."
+      - name: born_overseas_population
+        description: "Population born outside Australia."
+
+  - name: census_g02_clean
+    description: "Cleaned Census G02 data with income and household info per LGA."
+    columns:
+      - name: lga_code
+        description: "Foreign key to LGA."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('lga_code_clean')
+              field: lga_code
+      - name: Median_age_persons
+        description: "Median age of persons in the LGA."
+      - name: Median_rent_weekly
+        description: "Median weekly rent."
+      - name: Median_tot_prsnl_inc_weekly
+        description: "Median weekly personal income."
+      - name: Average_household_size
+        description: "Average household size in the LGA."

@@ -1,9 +1,10 @@
-{{ config(schema='silver', materialized='view') }}
+{{ config(schema='silver', materialized='table') }}
 
-SELECT
-    md5(lower(trim(suburb_name))) AS suburb_key,
-    suburb_name,
-    l.lga_code
-FROM {{ ref('lga_suburb_clean') }} s
-LEFT JOIN {{ ref('lga_code_clean') }} l
+SELECT DISTINCT
+    LOWER(TRIM(s.suburb_name)) AS suburb_name,
+    TRIM(l.lga_code) AS lga_code,
+    LOWER(TRIM(l.lga_name)) AS lga_name
+FROM {{ source('bronze', 'lga_suburb') }} s
+LEFT JOIN {{ source('bronze', 'lga_code') }} l
     ON LOWER(TRIM(s.lga_name)) = LOWER(TRIM(l.lga_name))
+WHERE s.suburb_name IS NOT NULL
