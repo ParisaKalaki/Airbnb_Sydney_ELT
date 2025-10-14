@@ -87,14 +87,16 @@ models:
         description: "Foreign key referencing dm_host."
         tests:
           - relationships:
-              to: ref('dm_host')
-              field: host_key
+              arguments:
+                to: ref('dm_host')
+                field: host_key
       - name: suburb_key
         description: "Foreign key referencing dm_suburb."
         tests:
           - relationships:
-              to: ref('dm_suburb')
-              field: suburb_key
+              arguments:
+                to: ref('dm_suburb')
+                field: suburb_key
       - name: lga_key
         description: "Foreign key referencing dm_lga_enriched."
         tests:
