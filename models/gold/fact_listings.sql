@@ -4,15 +4,15 @@ SELECT
     f.listing_id,
     f.scraped_date,
     f.price,
-    f.host_id,
     f.number_of_reviews,
     f.availability_30,
-    h.host_name,
-    h.host_is_superhost,
-    f.lga_code,
-    f.suburb_name
+    h.host_key,        -- reference to dm_host
+    s.suburb_key,      -- reference to dm_suburb
+    l.lga_key          -- reference to dm_lga
 FROM {{ ref('listings_clean') }} f
-LEFT JOIN {{ ref('host_snapshot') }} h
+LEFT JOIN {{ ref('dm_host') }} h
     ON f.host_id = h.host_id
-   AND f.scraped_date BETWEEN h.dbt_valid_from AND COALESCE(h.dbt_valid_to, CURRENT_DATE)
-
+LEFT JOIN {{ ref('dm_suburb') }} s
+    ON LOWER(TRIM(f.suburb_name)) = LOWER(TRIM(s.suburb_name))
+LEFT JOIN {{ ref('dm_lga') }} l
+    ON f.lga_code = l.lga_code
