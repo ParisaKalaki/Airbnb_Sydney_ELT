@@ -101,5 +101,6 @@ models:
         description: "Foreign key referencing dm_lga_enriched."
         tests:
           - relationships:
-              to: ref('dm_lga_enriched')
-              field: lga_key
+              arguments:
+                to: ref('dm_lga_enriched')
+                field: lga_key
