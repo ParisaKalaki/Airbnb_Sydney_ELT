@@ -12,7 +12,7 @@
 SELECT
     listing_id,
     scrape_id,
-    scraped_date::date AS scraped_date,
+    scraped_date,
     host_id,
     host_name,
     host_since::date AS host_since,
@@ -34,6 +34,6 @@ SELECT
     review_scores_value::numeric AS review_scores_value,
     lga_code,
     suburb_name
-FROM {{ source('bronze', 'airbnb_raw') }}
+FROM {{ ref('listings_clean')  }}
 
 {% endsnapshot %}
