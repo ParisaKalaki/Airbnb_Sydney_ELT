@@ -10,9 +10,9 @@ SELECT
     s.suburb_key,      -- reference to dm_suburb
     l.lga_key          -- reference to dm_lga
 FROM {{ ref('listings_clean') }} f
-LEFT JOIN {{ ref('dm_host') }} h
+LEFT JOIN {{ ref('dim_host') }} h
     ON f.host_id = h.host_id
-LEFT JOIN {{ ref('dm_suburb') }} s
+LEFT JOIN {{ ref('dim_suburb') }} s
     ON LOWER(TRIM(f.suburb_name)) = LOWER(TRIM(s.suburb_name))
-LEFT JOIN {{ ref('dm_lga') }} l
+LEFT JOIN {{ ref('dim_lga') }} l
     ON f.lga_code = l.lga_code
