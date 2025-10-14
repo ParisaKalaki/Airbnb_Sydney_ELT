@@ -73,8 +73,9 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('lga_code_clean')
-              field: lga_code
+             arguments:
+                to: ref('lga_code_clean')
+                field: lga_code
       - name: lga_name
         description: "LGA name, duplicated for convenience."
 
@@ -86,8 +87,9 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('lga_code_clean')
-              field: lga_code
+                arguments:
+                  to: ref('lga_code_clean')
+                  field: lga_code
       - name: total_population
         description: "Total population of the LGA."
       - name: indigenous_population
@@ -103,8 +105,9 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('lga_code_clean')
-              field: lga_code
+              arguments:
+                to: ref('lga_code_clean')
+                field: lga_code
       - name: Median_age_persons
         description: "Median age of persons in the LGA."
       - name: Median_rent_weekly
