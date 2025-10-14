@@ -4,5 +4,5 @@ SELECT
     md5(cast(lga_code as text)) as lga_key,
     lga_code,
     lga_name
-FROM {{ ref('lga_code_snapshot') }}
+FROM {{ ref('lga_code_clean') }}
 WHERE dbt_valid_to IS NULL
