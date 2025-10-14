@@ -49,8 +49,9 @@ models:
         description: "Foreign key referencing the LGA dimension."
         tests:
           - relationships:
-              to: ref('dm_lga')
-              field: lga_code
+              arguments:
+                to: ref('dm_lga')
+                field: lga_code
       - name: total_population
         description: "Total population of the LGA."
       - name: median_age_persons
