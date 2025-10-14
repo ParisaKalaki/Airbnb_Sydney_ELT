@@ -4,7 +4,7 @@
       target_schema='silver',
       unique_key='host_id',
       strategy='timestamp',
-      updated_at='scraped_date'  -- use the scraped date from listings_clean
+      updated_at='scraped_date'  
     )
   }}
 
