@@ -19,9 +19,11 @@ WITH base AS (
         room_type,
         accommodates::integer AS accommodates,
         CAST(price AS numeric) AS price,
-        CASE WHEN has_availability = 't' THEN TRUE
-             WHEN has_availability = 'f' THEN FALSE
-             ELSE NULL END AS has_availability,
+        CASE 
+            WHEN has_availability = 't' THEN TRUE
+            WHEN has_availability = 'f' THEN FALSE
+            ELSE NULL 
+        END AS has_availability,
         availability_30::integer AS availability_30,
         number_of_reviews::integer AS number_of_reviews,
         review_scores_rating::numeric AS review_scores_rating,
@@ -31,8 +33,12 @@ WITH base AS (
         review_scores_communication::numeric AS review_scores_communication,
         review_scores_value::numeric AS review_scores_value
     FROM {{ source('bronze', 'airbnb_raw') }}
+    
     {% if is_incremental() %}
-        WHERE scraped_date > (SELECT MAX(scraped_date) FROM {{ this }})
+        WHERE scraped_date > COALESCE(
+            (SELECT MAX(scraped_date) FROM {{ this }}),
+            '1900-01-01'  -- fallback if Silver is empty
+        )
     {% endif %}
 )
 
