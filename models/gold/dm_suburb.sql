@@ -1,8 +1,9 @@
--- models/gold/dm_suburb.sql
 {{ config(schema='gold', materialized='table') }}
-SELECT DISTINCT
-    md5(lower(trim(suburb_name))) AS suburb_key,
-    suburb_name,
-    lga_code
-FROM {{ ref('lga_suburb_clean') }}
 
+SELECT DISTINCT
+    md5(lower(trim(COALESCE(listing_neighbourhood, suburb_name)))) AS suburb_key,
+    COALESCE(listing_neighbourhood, suburb_name) AS suburb_name,
+    lga_code,
+    lga_name
+FROM {{ ref('lga_suburb_clean') }}
+WHERE COALESCE(listing_neighbourhood, suburb_name) IS NOT NULL
