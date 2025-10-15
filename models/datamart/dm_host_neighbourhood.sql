@@ -26,4 +26,4 @@ agg AS (
 
 SELECT *
 FROM agg
-ORDER BY host_neighbourhood, year, month;
+ORDER BY host_neighbourhood, year, month

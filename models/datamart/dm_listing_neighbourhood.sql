@@ -62,4 +62,4 @@ SELECT
     total_estimated_revenue,
     avg_estimated_revenue_per_host
 FROM pct_change
-ORDER BY listing_neighbourhood, year, month;
+ORDER BY listing_neighbourhood, year, month
