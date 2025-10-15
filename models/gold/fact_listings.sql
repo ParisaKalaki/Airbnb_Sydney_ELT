@@ -9,7 +9,7 @@ WITH mapped AS (
     LEFT JOIN {{ ref('dm_suburb') }} s
     ON LOWER(TRIM(f.listing_neighbourhood)) = LOWER(TRIM(s.suburb_name))
     LEFT JOIN {{ ref('dm_lga') }} l
-        ON f.lga_code = l.lga_code
+        ON s.lga_code = l.lga_code
 
 )
 SELECT
