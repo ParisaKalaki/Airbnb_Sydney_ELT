@@ -5,7 +5,7 @@ WITH base AS (
         COALESCE(NULLIF(TRIM(l.listing_neighbourhood), ''), 'Unknown') AS listing_neighbourhood,
         EXTRACT(YEAR FROM f.scraped_date) AS year,
         EXTRACT(MONTH FROM f.scraped_date) AS month,
-        f.host_id,
+        l.host_id,
         l.has_availability,
         f.price,
         l.review_scores_rating,

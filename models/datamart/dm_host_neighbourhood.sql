@@ -5,7 +5,7 @@ WITH base AS (
         COALESCE(NULLIF(TRIM(l.host_neighbourhood), ''), 'Unknown') AS host_neighbourhood,
         EXTRACT(YEAR FROM f.scraped_date) AS year,
         EXTRACT(MONTH FROM f.scraped_date) AS month,
-        f.host_id,
+        l.host_id,
         (30 - l.availability_30) * f.price AS estimated_revenue
     FROM {{ ref('fact_listings') }} f
     LEFT JOIN {{ ref('listings_clean') }} l
