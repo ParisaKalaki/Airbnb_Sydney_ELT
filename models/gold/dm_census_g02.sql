@@ -1,4 +1,4 @@
-{{ config(schema='gold', materialized='view') }}
+{{ config(schema='gold', materialized='table') }}
 
 SELECT
     md5(lga_code) AS census_g02_key,

@@ -1,4 +1,4 @@
-{{ config(schema='gold', materialized='view') }}
+{{ config(schema='gold', materialized='table') }}
 
 SELECT
     listing_id,

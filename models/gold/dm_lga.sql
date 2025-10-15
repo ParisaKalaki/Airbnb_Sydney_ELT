@@ -1,4 +1,4 @@
-{{ config(schema='gold', materialized='view') }}
+{{ config(schema='gold', materialized='table') }}
 
 SELECT
     md5(cast(lga_code as text)) as lga_key,
