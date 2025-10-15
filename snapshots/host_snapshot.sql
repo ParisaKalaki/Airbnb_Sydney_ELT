@@ -4,16 +4,15 @@
       target_schema='silver',
       unique_key='host_id',
       strategy='timestamp',
-      updated_at='scraped_date'  
+      updated_at='host_since'
     )
   }}
 
-  SELECT
+SELECT
     host_id,
     host_name,
     host_since,
     host_is_superhost,
-    host_neighbourhood,
-    scraped_date
-  FROM {{ ref('listings_clean') }}
+    host_neighbourhood
+FROM {{ ref('host_clean') }}
 {% endsnapshot %}
