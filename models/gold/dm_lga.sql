@@ -5,4 +5,4 @@ SELECT
     lga_code,
     lga_name
 FROM {{ ref('lga_code_clean') }}
-WHERE dbt_valid_to IS NULL
+

@@ -6,4 +6,4 @@ SELECT
     host_name,
     host_is_superhost
 FROM {{ ref('host_snapshot') }}
-WHERE dbt_valid_to IS NULL
+
