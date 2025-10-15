@@ -73,4 +73,4 @@ SELECT
     total_estimated_revenue,
     avg_estimated_revenue_per_listing
 FROM pct_change
-ORDER BY property_type, room_type, accommodates, year, month;
+ORDER BY property_type, room_type, accommodates, year, month
