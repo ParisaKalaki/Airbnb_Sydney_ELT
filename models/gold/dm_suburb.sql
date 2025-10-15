@@ -1,5 +1,5 @@
 -- models/gold/dm_suburb.sql
-{{ config(schema='gold', materialized='view') }}
+{{ config(schema='gold', materialized='table') }}
 SELECT DISTINCT
     md5(lower(trim(suburb_name))) AS suburb_key,
     suburb_name,
