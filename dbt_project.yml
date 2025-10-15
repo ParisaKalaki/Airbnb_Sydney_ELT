@@ -19,10 +19,6 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 models:
   airbnb_dw:
-    bronze:
-      +schema: bronze
-      +materialized: table 
-    
     silver:
       +schema: silver
       +materialized: incremental 
