@@ -1,7 +1,8 @@
 {{ config(schema='datamart', materialized='view') }}
+
 WITH base AS (
     SELECT
-        l.listing_neighbourhood,
+        COALESCE(NULLIF(TRIM(l.listing_neighbourhood), ''), 'Unknown') AS listing_neighbourhood,
         EXTRACT(YEAR FROM f.scraped_date) AS year,
         EXTRACT(MONTH FROM f.scraped_date) AS month,
         f.host_id,
@@ -27,15 +28,14 @@ agg AS (
         PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY CASE WHEN has_availability='t' THEN price END) AS median_price,
         AVG(CASE WHEN has_availability='t' THEN price END) AS avg_price,
         COUNT(DISTINCT host_id) AS distinct_hosts,
-        COUNT(DISTINCT CASE WHEN has_availability=true AND host_is_superhost='t' THEN host_id END) * 100.0 / COUNT(DISTINCT host_id) AS superhost_rate,
+        COUNT(DISTINCT CASE WHEN has_availability='t' AND host_is_superhost='t' THEN host_id END) * 100.0 / COUNT(DISTINCT host_id) AS superhost_rate,
         AVG(CASE WHEN has_availability='t' THEN review_scores_rating END) AS avg_review_score,
         SUM(CASE WHEN has_availability='t' THEN number_of_stays END) AS total_stays,
         SUM(CASE WHEN has_availability='t' THEN estimated_revenue END) AS total_estimated_revenue,
-        SUM(CASE WHEN has_availability='t' THEN estimated_revenue END) / NULLIF(COUNT(DISTINCT host_id),0) AS avg_estimated_revenue_per_host
+        SUM(CASE WHEN has_availability='t' THEN estimated_revenue END) / NULLIF(COUNT(DISTINCT CASE WHEN has_availability='t' THEN host_id END),0) AS avg_estimated_revenue_per_host
     FROM base
     GROUP BY listing_neighbourhood, year, month
 ),
-
 pct_change AS (
     SELECT
         *,
@@ -62,4 +62,4 @@ SELECT
     total_estimated_revenue,
     avg_estimated_revenue_per_host
 FROM pct_change
-ORDER BY listing_neighbourhood, year, month
+ORDER BY listing_neighbourhood, year, month;
