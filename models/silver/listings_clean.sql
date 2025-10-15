@@ -11,7 +11,7 @@ WITH base AS (
         scraped_date,
         host_id,
         host_name,
-        host_since::date AS host_since,
+        host_since,
         host_is_superhost,
         host_neighbourhood,
         listing_neighbourhood,
