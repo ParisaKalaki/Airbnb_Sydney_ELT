@@ -7,7 +7,7 @@ WITH base AS (
         COALESCE(l.accommodates, 0) AS accommodates,
         EXTRACT(YEAR FROM f.scraped_date) AS year,
         EXTRACT(MONTH FROM f.scraped_date) AS month,
-        f.host_id,
+        l.host_id,
         COALESCE(l.has_availability::boolean, FALSE) AS has_availability,
         f.price,
         l.review_scores_rating,
@@ -18,7 +18,7 @@ WITH base AS (
     LEFT JOIN {{ ref('listings_clean') }} l
         ON f.listing_id = l.listing_id
     LEFT JOIN {{ ref('host_snapshot') }} h
-        ON f.host_id = h.host_id
+        ON l.host_id = h.host_id
        AND f.scraped_date BETWEEN h.dbt_valid_from AND COALESCE(h.dbt_valid_to, CURRENT_DATE)
 ),
 
