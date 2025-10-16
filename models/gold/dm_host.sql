@@ -2,8 +2,9 @@
 
 SELECT
     host_id,
-    md5(cast(host_id as text)) AS host_key,
+    md5(cast(host_id AS text)) AS host_key,
     host_name,
-    host_is_superhost::boolean
+    host_is_superhost::boolean,
+    dbt_valid_from,
+    dbt_valid_to
 FROM {{ ref('host_snapshot') }}
-
