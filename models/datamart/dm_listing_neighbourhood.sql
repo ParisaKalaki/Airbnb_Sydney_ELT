@@ -5,20 +5,28 @@ WITH base AS (
         s.suburb_name AS listing_neighbourhood,
         EXTRACT(YEAR FROM f.scraped_date) AS year,
         EXTRACT(MONTH FROM f.scraped_date) AS month,
-        h.host_id,
+        h.host_key,
         h.host_is_superhost,
+        p.property_type,
+        p.room_type,
+        p.accommodates,
         f.price,
-        f.availability_30,
         f.number_of_reviews,
-        f.review_scores_rating,
+        f.availability_30,
+        f.scraped_date,
+        f.host_key,
         (30 - f.availability_30) AS number_of_stays,
         (30 - f.availability_30) * f.price AS estimated_revenue,
-        CASE WHEN f.availability_30 < 30 THEN TRUE ELSE FALSE END AS is_active
+        f.suburb_key,
+        f.lga_key,
+        f.property_key
     FROM {{ ref('fact_listings') }} f
     LEFT JOIN {{ ref('dm_host') }} h
         ON f.host_key = h.host_key
     LEFT JOIN {{ ref('dm_suburb') }} s
         ON f.suburb_key = s.suburb_key
+    LEFT JOIN {{ ref('dm_property') }} p
+        ON f.property_key = p.property_key
 ),
 
 agg AS (
@@ -27,20 +35,17 @@ agg AS (
         year,
         month,
         COUNT(*) AS total_listings,
-        COUNT(CASE WHEN is_active THEN 1 END) AS active_listings,
-        MIN(CASE WHEN is_active THEN price END) AS min_price,
-        MAX(CASE WHEN is_active THEN price END) AS max_price,
-        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY CASE WHEN is_active THEN price END) AS median_price,
-        ROUND(AVG(CASE WHEN is_active THEN price END), 2) AS avg_price,
-        COUNT(DISTINCT host_id) AS distinct_hosts,
-        ROUND(
-            COUNT(DISTINCT CASE WHEN is_active AND host_is_superhost = 't' THEN host_id END)
-            * 100.0 / NULLIF(COUNT(DISTINCT host_id), 0), 2
-        ) AS superhost_rate,
-        ROUND(AVG(CASE WHEN is_active THEN review_scores_rating END), 2) AS avg_review_score,
-        SUM(number_of_stays) AS total_stays,
-        ROUND(SUM(CASE WHEN is_active THEN estimated_revenue END) / NULLIF(COUNT(CASE WHEN is_active THEN 1 END), 0), 2)
-            AS avg_estimated_revenue_per_active
+        COUNT(CASE WHEN availability_30 > 0 THEN 1 END) AS active_listings,
+        MIN(CASE WHEN availability_30 > 0 THEN price END) AS min_price,
+        MAX(CASE WHEN availability_30 > 0 THEN price END) AS max_price,
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY CASE WHEN availability_30 > 0 THEN price END) AS median_price,
+        AVG(CASE WHEN availability_30 > 0 THEN price END) AS avg_price,
+        COUNT(DISTINCT host_key) AS distinct_hosts,
+        COUNT(DISTINCT CASE WHEN availability_30 > 0 AND host_is_superhost THEN host_key END) * 100.0 / NULLIF(COUNT(DISTINCT host_key),0) AS superhost_rate,
+        AVG(CASE WHEN availability_30 > 0 THEN number_of_reviews END) AS avg_review_score,
+        SUM(CASE WHEN availability_30 > 0 THEN number_of_stays END) AS total_stays,
+        SUM(CASE WHEN availability_30 > 0 THEN estimated_revenue END) AS total_estimated_revenue,
+        SUM(CASE WHEN availability_30 > 0 THEN estimated_revenue END) / NULLIF(COUNT(DISTINCT CASE WHEN availability_30 > 0 THEN host_key END),0) AS avg_estimated_revenue_per_host
     FROM base
     GROUP BY listing_neighbourhood, year, month
 ),
@@ -57,7 +62,7 @@ SELECT
     listing_neighbourhood,
     year,
     month,
-    ROUND(active_listings * 100.0 / NULLIF(total_listings, 0), 2) AS active_listings_rate,
+    active_listings * 100.0 / total_listings AS active_listings_rate,
     min_price,
     max_price,
     median_price,
@@ -66,8 +71,9 @@ SELECT
     superhost_rate,
     avg_review_score,
     total_stays,
-    ROUND((active_listings - prev_active) * 100.0 / NULLIF(prev_active, 0), 2) AS pct_change_active,
-    ROUND(((total_listings - active_listings) - prev_inactive) * 100.0 / NULLIF(prev_inactive, 0), 2) AS pct_change_inactive,
-    avg_estimated_revenue_per_active
+    (active_listings - prev_active) * 100.0 / NULLIF(prev_active,0) AS pct_change_active,
+    ((total_listings - active_listings) - prev_inactive) * 100.0 / NULLIF(prev_inactive,0) AS pct_change_inactive,
+    total_estimated_revenue,
+    avg_estimated_revenue_per_host
 FROM pct_change
 ORDER BY listing_neighbourhood, year, month;
