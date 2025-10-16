@@ -12,7 +12,11 @@ WITH base AS (
         host_id,
         host_name,
         host_since,
-        host_is_superhost,
+        CASE 
+            WHEN host_is_superhost = 't' THEN TRUE
+            WHEN host_is_superhost = 'f' THEN FALSE
+            ELSE NULL 
+        END AS host_is_superhost,
         host_neighbourhood,
         listing_neighbourhood,
         property_type,
@@ -33,13 +37,7 @@ WITH base AS (
         review_scores_communication::numeric AS review_scores_communication,
         review_scores_value::numeric AS review_scores_value
     FROM {{ source('bronze', 'airbnb_raw') }}
-    
-    {% if is_incremental() %}
-        WHERE scraped_date > COALESCE(
-            (SELECT MAX(scraped_date) FROM {{ this }}),
-            '1900-01-01'  -- fallback if Silver is empty
-        )
-    {% endif %}
+
 )
 
 SELECT * FROM base
