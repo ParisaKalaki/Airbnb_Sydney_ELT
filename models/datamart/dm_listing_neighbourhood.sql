@@ -1,32 +1,28 @@
-{{ config(schema='datamart', materialized='view') }}
+{{ config(
+    schema='datamart',
+    materialized='view'
+) }}
 
 WITH base AS (
     SELECT
         s.suburb_name AS listing_neighbourhood,
         EXTRACT(YEAR FROM f.scraped_date) AS year,
         EXTRACT(MONTH FROM f.scraped_date) AS month,
-        h.host_key,
+        f.host_key,
+        f.price,
+        f.availability_30,
         h.host_is_superhost,
         p.property_type,
-        p.room_type,
-        p.accommodates,
-        f.price,
-        f.number_of_reviews,
-        f.availability_30,
-        f.scraped_date,
-        f.host_key,
-        (30 - f.availability_30) AS number_of_stays,
-        (30 - f.availability_30) * f.price AS estimated_revenue,
-        f.suburb_key,
-        f.lga_key,
-        f.property_key
+        l.review_scores_rating
     FROM {{ ref('fact_listings') }} f
-    LEFT JOIN {{ ref('dm_host') }} h
-        ON f.host_key = h.host_key
     LEFT JOIN {{ ref('dm_suburb') }} s
         ON f.suburb_key = s.suburb_key
+    LEFT JOIN {{ ref('dm_host') }} h
+        ON f.host_key = h.host_key
     LEFT JOIN {{ ref('dm_property') }} p
         ON f.property_key = p.property_key
+    LEFT JOIN {{ ref('listings_clean') }} l
+        ON f.listing_id = l.listing_id
 ),
 
 agg AS (
@@ -42,10 +38,10 @@ agg AS (
         AVG(CASE WHEN availability_30 > 0 THEN price END) AS avg_price,
         COUNT(DISTINCT host_key) AS distinct_hosts,
         COUNT(DISTINCT CASE WHEN availability_30 > 0 AND host_is_superhost THEN host_key END) * 100.0 / NULLIF(COUNT(DISTINCT host_key),0) AS superhost_rate,
-        AVG(CASE WHEN availability_30 > 0 THEN number_of_reviews END) AS avg_review_score,
-        SUM(CASE WHEN availability_30 > 0 THEN number_of_stays END) AS total_stays,
-        SUM(CASE WHEN availability_30 > 0 THEN estimated_revenue END) AS total_estimated_revenue,
-        SUM(CASE WHEN availability_30 > 0 THEN estimated_revenue END) / NULLIF(COUNT(DISTINCT CASE WHEN availability_30 > 0 THEN host_key END),0) AS avg_estimated_revenue_per_host
+        AVG(CASE WHEN availability_30 > 0 THEN review_scores_rating END) AS avg_review_score,
+        SUM(CASE WHEN availability_30 > 0 THEN (30 - availability_30) END) AS total_stays,
+        SUM(CASE WHEN availability_30 > 0 THEN (30 - availability_30) * price END) AS total_estimated_revenue,
+        SUM(CASE WHEN availability_30 > 0 THEN (30 - availability_30) * price END) / NULLIF(COUNT(DISTINCT CASE WHEN availability_30 > 0 THEN host_key END),0) AS avg_estimated_revenue_per_host
     FROM base
     GROUP BY listing_neighbourhood, year, month
 ),
@@ -76,4 +72,4 @@ SELECT
     total_estimated_revenue,
     avg_estimated_revenue_per_host
 FROM pct_change
-ORDER BY listing_neighbourhood, year, month;
+ORDER BY listing_neighbourhood, year, month
