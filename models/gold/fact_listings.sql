@@ -5,6 +5,7 @@ WITH mapped AS (
         f.*,
         s.suburb_key,
         l.lga_key,
+        l.lga_code,
         p.property_key,
         h.host_key
     FROM {{ ref('listings_clean') }} f
@@ -31,6 +32,7 @@ SELECT
     host_key,
     suburb_key,
     lga_key,
+    lga_code,
     property_key
 FROM mapped
 
